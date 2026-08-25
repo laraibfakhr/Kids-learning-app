@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Let's Learn!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@700;800&display=swap');
+
+  :root{
+    --sky: #7FD1E0;
+    --sky-deep: #4FB8CE;
+    --sun: #FFD23F;
+    --grass: #6FCF97;
+    --grass-deep: #4EAF78;
+    --coral: #FF6F59;
+    --cream: #FFFDF7;
+    --plum: #3A2E5C;
+    --wrong: #FF9E80;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Nunito', sans-serif;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  .bg-grad {
+    background: linear-gradient(180deg, var(--sky) 0%, var(--sky-deep) 45%, var(--grass-deep) 45%, var(--grass) 100%);
+  }
+
+  .screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3vh 4vw;
+  }
+
+  h1, .headline {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    color: var(--cream);
+    text-shadow: 0 3px 0 rgba(0,0,0,0.12);
+    font-size: clamp(20px, 4.5vw, 30px);
+    margin: 6px 0;
+  }
+
+  /* fixed controls */
+  .fixedBtn {
+    position: fixed;
+    top: 14px;
+    background: var(--cream);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #audioToggle { right: 14px; }
+  #homeBtn { left: 14px; display: none; }
+
+  /* sun mascot, reused across screens */
+  .mascot {
+    width: 18vw;
+    max-width: 100px;
+    min-width: 74px;
+    aspect-ratio: 1;
+    background: var(--sun);
+    border-radius: 50%;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    animation: sunBob 3s ease-in-out infinite;
+  }
+  @keyframes sunBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes mascotHappy { 0%,100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.15) rotate(-8deg); } 75% { transform: scale(1.15) rotate(8deg); } }
+
+  /* progress bar */
+  .progressBar {
+    display: flex;
+    gap: 5px;
+    width: min(88vw, 460px);
+    margin: 10px 0;
+  }
+  .segment {
+    flex: 1;
+    height: 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.35);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .segment.completed { background: var(--cream); }
+  .segment.current { background: var(--sun); transform: scaleY(1.2); }
+
+  .footNote {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    font-size: clamp(12px, 2.2vw, 15px);
+    margin-top: auto;
+    padding-top: 1.5vh;
+  }
+
+  .confetti {
+    position: fixed;
+    top: -5vh;
+    font-size: 26px;
+    z-index: 200;
+    animation: fall linear forwards;
+    pointer-events: none;
+  }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0.9; } }
+
+  /* ---------- name screen ---------- */
+  #nameScreen .waveSun svg { width: 42px; height: 42px; }
+  #nameInput {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 500;
+    font-size: clamp(20px, 4.5vw, 28px);
+    text-align: center;
+    color: var(--plum);
+    background: var(--cream);
+    border: none;
+    border-radius: 18px;
+    padding: 14px 24px;
+    width: min(80vw, 320px);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+    outline: none;
+    margin: 14px 0;
+  }
+  #nameInput::placeholder { color: rgba(58,46,92,0.4); }
+  #startBtn {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(18px, 4vw, 24px);
+    color: var(--cream);
+    background: var(--coral);
+    border: none;
+    border-radius: 18px;
+    padding: 14px 36px;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+    cursor: pointer;
+  }
+  #startBtn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.15); }
+
+  /* ---------- home screen ---------- */
+  .cardRow {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 3vh;
+  }
+  .gameCard {
+    background: var(--cream);
+    border-radius: 26px;
+    padding: 26px 22px;
+    width: 42vw;
+    max-width: 180px;
+    min-width: 130px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .gameCard:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.12); }
+  .cardEmoji { font-size: clamp(40px, 9vw, 58px); }
+  .cardTitle {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    color: var(--plum);
+    font-size: clamp(15px, 3.2vw, 19px);
+    text-align: center;
+  }
+
+  /* ---------- count & match game ---------- */
+  #countBoard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2.5vw;
+    background: rgba(255,253,247,0.35);
+    border-radius: 28px;
+    padding: 3vh 5vw;
+    margin: 2vh 4vw 0;
+    min-height: 14vh;
+  }
+  .obj {
+    font-size: clamp(42px, 9vw, 70px);
+    line-height: 1;
+    filter: drop-shadow(0 5px 3px rgba(0,0,0,0.15));
+    animation: idleBounce 2.4s ease-in-out infinite;
+  }
+  .obj:nth-child(2n) { animation-delay: 0.3s; }
+  .obj:nth-child(3n) { animation-delay: 0.6s; }
+  @keyframes idleBounce { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(-3deg); } }
+
+  #choiceStage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4vw;
+    padding: 2vh 4vw;
+  }
+  .choice {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    background: var(--cream);
+    color: var(--plum);
+    border: none;
+    border-radius: 50%;
+    width: clamp(70px, 17vw, 110px);
+    aspect-ratio: 1;
+    font-size: clamp(30px, 6.5vw, 50px);
+    box-shadow: 0 7px 0 rgba(0,0,0,0.12);
+    cursor: pointer;
+  }
+  .choice:active { transform: translateY(3px); box-shadow: 0 4px 0 rgba(0,0,0,0.12); }
+  .choice.correct { background: var(--grass-deep); color: var(--cream); animation: pop 0.5s ease; }
+  .choice.wrong { animation: shake 0.4s ease; background: var(--wrong); color: var(--cream); }
+  @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+  .hidden { display: none !important; }
+
+  /* ---------- object matching game ---------- */
+  #matchBoard {
+    position: relative;
+    width: min(92vw, 620px);
+    flex: 1 1 auto;
+    min-height: 300px;
+    margin: 1.5vh 0;
+  }
+  #lineLayer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+  .linePath {
+    position: absolute;
+    height: 5px;
+    background: var(--grass-deep);
+    border-radius: 3px;
+    transform-origin: 0 50%;
+    pointer-events: none;
+  }
+  .linePath.temp { background: var(--coral); opacity: 0.85; }
+  .linePath.wrongline { background: #FF5252; }
+
+  .matchCols {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-between;
+    z-index: 2;
+  }
+  .matchCol {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 100%;
+    width: 46%;
+  }
+  .matchItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,253,247,0.95);
+    border-radius: 18px;
+    padding: 8px 12px;
+    font-size: clamp(30px, 6vw, 46px);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+    cursor: grab;
+    touch-action: none;
+  }
+  .matchItem.right { flex-direction: row-reverse; cursor: default; }
+  .matchDot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--coral);
+    flex-shrink: 0;
+  }
+  .matchItem.matched { opacity: 0.4; pointer-events: none; }
+  .matchItem.matched .matchDot { background: var(--grass-deep); }
+
+  .matchEmoji {
+    font-size: clamp(30px, 6vw, 46px);
+    line-height: 1;
+  }
+  .matchShapeWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .matchShapeSvg {
+    width: clamp(40px, 9vw, 58px);
+    height: clamp(40px, 9vw, 58px);
+    display: block;
+  }
+  .matchLetter {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(30px, 6.5vw, 48px);
+    color: var(--plum);
+    min-width: 1.1em;
+    text-align: center;
+  }
+
+  #letterBoard {
+    position: relative;
+    width: min(92vw, 620px);
+    flex: 1 1 auto;
+    min-height: 300px;
+    margin: 1.5vh 0;
+  }
+  #letterLineLayer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+  .colorSwatch {
+    width: clamp(40px, 9vw, 56px);
+    height: clamp(40px, 9vw, 56px);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 3px rgba(255,255,255,0.6), 0 3px 0 rgba(0,0,0,0.08);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body class="bg-grad">
+
+<button id="audioToggle" class="fixedBtn" aria-label="Toggle sound">🔊</button>
+<button id="homeBtn" class="fixedBtn" aria-label="Back to home">🏠</button>
+
+<!-- NAME SCREEN -->
+<div id="nameScreen" class="screen">
+  <div class="mascot waveSun" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 12.5V5.5a1.5 1.5 0 0 1 3 0v5M12 10.5V4a1.5 1.5 0 0 1 3 0v6.5M15 10.5V6a1.5 1.5 0 0 1 3 0v8c0 3.5-2.5 6-6 6h-1c-2 0-3-.6-4.2-2L4 15c-.6-.8-.4-1.8.4-2.3.7-.4 1.6-.3 2.1.3l1.5 1.7V7.5a1.5 1.5 0 0 1 3 0v5" stroke="#3A2E5C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="#FF6F59"/>
+    </svg>
+  </div>
+  <h1>What's your name?</h1>
+  <input id="nameInput" type="text" placeholder="Type your name" maxlength="20" autocomplete="off">
+  <button id="startBtn">Let's Play!</button>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="screen hidden">
+  <h1 id="homeGreet">Hi! What do you want to play?</h1>
+  <div class="cardRow">
+    <div class="gameCard" id="cardCount">
+      <div class="cardEmoji">🔢</div>
+      <div class="cardTitle">Count and Match</div>
+    </div>
+    <div class="gameCard" id="cardObject">
+      <div class="cardEmoji">🥦</div>
+      <div class="cardTitle">Object Matching</div>
+    </div>
+    <div class="gameCard" id="cardLetters">
+      <div class="cardEmoji">🔤</div>
+      <div class="cardTitle">Capital &amp; Small Letters</div>
+    </div>
+  </div>
+</div>
+
+<!-- COUNT & MATCH SCREEN -->
+<div id="countScreen" class="screen hidden">
+  <div class="progressBar" id="progressBarCount"></div>
+  <div class="mascot" id="mascotCount" aria-hidden="true">😊</div>
+  <div class="headline" id="headlineCount">How many do you see?</div>
+  <div id="countBoard"></div>
+  <div id="choiceStage"></div>
+  <div class="footNote" id="footNoteCount">Tap the number that matches</div>
+</div>
+
+<!-- OBJECT MATCHING SCREEN -->
+<div id="matchScreen" class="screen hidden">
+  <div class="progressBar" id="progressBarMatch"></div>
+  <div class="mascot" id="mascotMatch" aria-hidden="true">😊</div>
+  <div class="headline" id="headlineMatch">Match them up!</div>
+  <div id="matchBoard">
+    <div id="lineLayer"></div>
+    <div class="matchCols">
+      <div class="matchCol" id="leftCol"></div>
+      <div class="matchCol" id="rightCol"></div>
+    </div>
+  </div>
+  <div class="footNote" id="footNoteMatch">Drag a line to connect matching pairs</div>
+</div>
+
+<!-- CAPITAL & SMALL LETTERS SCREEN -->
+<div id="letterScreen" class="screen hidden">
+  <div class="progressBar" id="progressBarLetter"></div>
+  <div class="mascot" id="mascotLetter" aria-hidden="true">😊</div>
+  <div class="headline" id="headlineLetter">Match the letters!</div>
+  <div id="letterBoard">
+    <div id="letterLineLayer"></div>
+    <div class="matchCols">
+      <div class="matchCol" id="leftColL"></div>
+      <div class="matchCol" id="rightColL"></div>
+    </div>
+  </div>
+  <div class="footNote" id="footNoteLetter">Match each capital letter to its small letter</div>
+</div>
+
+<script>
+(function(){
+  /* ---------- shared helpers ---------- */
+  const audioToggle = document.getElementById('audioToggle');
+  const homeBtn = document.getElementById('homeBtn');
+  let soundOn = true;
+  let kidName = '';
+
+  audioToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+    audioToggle.textContent = soundOn ? '🔊' : '🔇';
+    if (!soundOn && window.speechSynthesis) window.speechSynthesis.cancel();
+  });
+
+  function speak(text) {
+    if (!soundOn) return;
+    try {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.85;
+      u.pitch = 1.3;
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* speech unavailable, continue silently */ }
+  }
+
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = randomInt(0, i);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Shuffles `items` so that no position matches the same position in `reference`
+  // (guarantees a genuinely scrambled board every round, not a coincidental lineup).
+  function shuffleDeranged(items, reference, keyFn) {
+    keyFn = keyFn || (x => x);
+    let arr = shuffle(items);
+    let guard = 0;
+    while (guard < 50 && arr.some((v, i) => keyFn(v) === keyFn(reference[i]))) {
+      arr = shuffle(items);
+      guard++;
+    }
+    return arr;
+  }
+
+  function burstConfetti() {
+    const emojis = ['🎉','✨','🎈','⭐','🌈'];
+    for (let i = 0; i < 16; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.textContent = emojis[randomInt(0, emojis.length - 1)];
+      c.style.left = randomInt(0, 100) + 'vw';
+      c.style.animationDuration = (1.4 + Math.random() * 1.2) + 's';
+      c.style.animationDelay = (Math.random() * 0.3) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3000);
+    }
+  }
+
+  function buildProgressBar(container, total) {
+    container.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'segment';
+      container.appendChild(seg);
+    }
+  }
+
+  function updateProgressBar(container, current, total) {
+    const segs = container.querySelectorAll('.segment');
+    segs.forEach((seg, idx) => {
+      seg.classList.remove('completed', 'current');
+      if (idx < current) seg.classList.add('completed');
+      else if (idx === current) seg.classList.add('current');
+    });
+  }
+
+  /* ---------- navigation ---------- */
+  const screens = ['nameScreen', 'homeScreen', 'countScreen', 'matchScreen', 'letterScreen'];
+  function showScreen(id) {
+    screens.forEach(s => {
+      document.getElementById(s).classList.toggle('hidden', s !== id);
+    });
+    homeBtn.style.display = (id === 'countScreen' || id === 'matchScreen' || id === 'letterScreen') ? 'flex' : 'none';
+  }
+
+  const nameScreen = document.getElementById('nameScreen');
+  const nameInput = document.getElementById('nameInput');
+  const startBtn = document.getElementById('startBtn');
+  const homeGreet = document.getElementById('homeGreet');
+
+  function startApp() {
+    kidName = nameInput.value.trim().slice(0, 20);
+    homeGreet.textContent = kidName ? `Hi ${kidName}! What do you want to play?` : 'Hi! What do you want to play?';
+    speak(kidName ? `Hi ${kidName}!` : 'Hi!');
+    showScreen('homeScreen');
+  }
+  startBtn.addEventListener('click', startApp);
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') startApp(); });
+
+  homeBtn.addEventListener('click', () => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    showScreen('homeScreen');
+  });
+
+  document.getElementById('cardCount').addEventListener('click', () => {
+    showScreen('countScreen');
+    CountGame.start();
+  });
+  document.getElementById('cardObject').addEventListener('click', () => {
+    showScreen('matchScreen');
+    MatchGame.start();
+  });
+  document.getElementById('cardLetters').addEventListener('click', () => {
+    showScreen('letterScreen');
+    LetterGame.start();
+  });
+
+  /* ================= COUNT & MATCH GAME ================= */
+  const CountGame = (function(){
+    const board = document.getElementById('countBoard');
+    const choiceStage = document.getElementById('choiceStage');
+    const mascot = document.getElementById('mascotCount');
+    const headline = document.getElementById('headlineCount');
+    const footNote = document.getElementById('footNoteCount');
+    const progressBar = document.getElementById('progressBarCount');
+
+    const THEMES = [
+      { emoji: '🐠', word: 'fish' },
+      { emoji: '🍎', word: 'apples' },
+      { emoji: '🎈', word: 'balloons' },
+      { emoji: '🌸', word: 'flowers' },
+      { emoji: '🐤', word: 'ducks' },
+      { emoji: '🍊', word: 'oranges' }
+    ];
+    const NUMBER_WORDS = ['zero','one','two','three','four','five','six'];
+    const TOTAL_ROUNDS = 10;
+
+    let correctCount = 0;
+    let roundLocked = false;
+    let currentRound = 0;
+
+    function buildChoices(correct) {
+      const options = new Set([correct]);
+      while (options.size < 3) {
+        options.add(randomInt(Math.max(1, correct - 2), Math.min(6, correct + 2)));
+      }
+      return shuffle(Array.from(options));
+    }
+
+    function newRound() {
+      if (currentRound >= TOTAL_ROUNDS) { finish(); return; }
+
+      roundLocked = false;
+      board.classList.remove('hidden');
+      choiceStage.classList.remove('hidden');
+      headline.textContent = 'How many do you see?';
+      footNote.textContent = 'Tap the number that matches';
+      mascot.textContent = '😊';
+      mascot.style.animation = '';
+      updateProgressBar(progressBar, currentRound, TOTAL_ROUNDS);
+
+      correctCount = randomInt(2, 5);
+      const theme = THEMES[randomInt(0, THEMES.length - 1)];
+
+      board.innerHTML = '';
+      for (let i = 0; i < correctCount; i++) {
+        const el = document.createElement('div');
+        el.className = 'obj';
+        el.textContent = theme.emoji;
+        board.appendChild(el);
+      }
+
+      const choices = buildChoices(correctCount);
+      choiceStage.innerHTML = '';
+      choices.forEach(num => {
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.textContent = num;
+        btn.addEventListener('click', () => handleChoice(btn, num));
+        choiceStage.appendChild(btn);
+      });
+
+      setTimeout(() => speak(`How many ${theme.word}?`), 300);
+    }
+
+    function handleChoice(btn, num) {
+      if (roundLocked) return;
+      if (num === correctCount) {
+        roundLocked = true;
+        btn.classList.add('correct');
+        celebrate();
+      } else {
+        btn.classList.add('wrong');
+        speak('Try again!');
+        setTimeout(() => btn.classList.remove('wrong'), 450);
+      }
+    }
+
+    function celebrate() {
+      mascot.textContent = '🎉';
+      mascot.style.animation = 'mascotHappy 0.7s ease';
+      headline.textContent = "That's right!";
+      footNote.textContent = 'Great counting!';
+      speak(`Yes! ${NUMBER_WORDS[correctCount]}!`);
+      burstConfetti();
+      currentRound++;
+      setTimeout(newRound, 2600);
+    }
+
+    function finish() {
+      board.innerHTML = '';
+      choiceStage.innerHTML = '';
+      board.classList.add('hidden');
+      choiceStage.classList.add('hidden');
+      updateProgressBar(progressBar, TOTAL_ROUNDS, TOTAL_ROUNDS);
+      mascot.textContent = '🏆';
+      mascot.style.animation = 'mascotHappy 0.9s ease';
+      headline.textContent = kidName ? `You did it, ${kidName}!` : 'You did it!';
+      footNote.textContent = 'Tap the sun to play again';
+      speak(kidName ? `You did it, ${kidName}! All done!` : 'You did it! All done!');
+      burstConfetti();
+    }
+
+    mascot.addEventListener('click', () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      currentRound = 0;
+      newRound();
+    });
+
+    return {
+      start: function() {
+        currentRound = 0;
+        buildProgressBar(progressBar, TOTAL_ROUNDS);
+        newRound();
+      }
+    };
+  })();
+
+  /* ================= OBJECT MATCHING GAME ================= */
+  const MatchGame = (function(){
+    const matchBoard = document.getElementById('matchBoard');
+    const lineLayer = document.getElementById('lineLayer');
+    const leftCol = document.getElementById('leftCol');
+    const rightCol = document.getElementById('rightCol');
+    const mascot = document.getElementById('mascotMatch');
+    const headline = document.getElementById('headlineMatch');
+    const footNote = document.getElementById('footNoteMatch');
+    const progressBar = document.getElementById('progressBarMatch');
+
+    const THEME_SETS = [
+      { label: 'vegetables', type: 'emoji', items: [
+        { name: 'broccoli', emoji: '🥦' },
+        { name: 'tomato', emoji: '🍅' },
+        { name: 'carrot', emoji: '🥕' },
+        { name: 'eggplant', emoji: '🍆' },
+        { name: 'pepper', emoji: '🫑' },
+        { name: 'corn', emoji: '🌽' }
+      ]},
+      { label: 'fruits', type: 'emoji', items: [
+        { name: 'apple', emoji: '🍎' },
+        { name: 'banana', emoji: '🍌' },
+        { name: 'grapes', emoji: '🍇' },
+        { name: 'strawberry', emoji: '🍓' },
+        { name: 'orange', emoji: '🍊' },
+        { name: 'pineapple', emoji: '🍍' }
+      ]},
+      { label: 'animals', type: 'emoji', items: [
+        { name: 'dog', emoji: '🐶' },
+        { name: 'cat', emoji: '🐱' },
+        { name: 'rabbit', emoji: '🐰' },
+        { name: 'bear', emoji: '🐻' },
+        { name: 'lion', emoji: '🦁' },
+        { name: 'elephant', emoji: '🐘' }
+      ]},
+      { label: 'birds', type: 'emoji', items: [
+        { name: 'sparrow', emoji: '🐦' },
+        { name: 'parrot', emoji: '🦜' },
+        { name: 'owl', emoji: '🦉' },
+        { name: 'peacock', emoji: '🦚' },
+        { name: 'penguin', emoji: '🐧' },
+        { name: 'duck', emoji: '🦆' }
+      ]},
+      { label: 'objects', type: 'emoji', items: [
+        { name: 'ball', emoji: '⚽' },
+        { name: 'car', emoji: '🚗' },
+        { name: 'book', emoji: '📖' },
+        { name: 'key', emoji: '🔑' },
+        { name: 'teddy bear', emoji: '🧸' },
+        { name: 'gift', emoji: '🎁' }
+      ]},
+      { label: 'shapes', type: 'shape', items: [
+        { name: 'circle', fill: '#4FB8CE', svg: '<circle cx="50" cy="50" r="42"/>' },
+        { name: 'square', fill: '#FF8A3D', svg: '<rect x="10" y="10" width="80" height="80" rx="8"/>' },
+        { name: 'triangle', fill: '#E4443F', svg: '<polygon points="50,8 92,90 8,90"/>' },
+        { name: 'star', fill: '#FFC93C', svg: '<polygon points="50,5 61,35 95,35 68,57 78,90 50,70 22,90 32,57 5,35 39,35"/>' },
+        { name: 'heart', fill: '#FF6F59', svg: '<path d="M50 85 C20 60 5 40 5 25 C5 10 20 0 32 5 C40 8 46 15 50 22 C54 15 60 8 68 5 C80 0 95 10 95 25 C95 40 80 60 50 85 Z"/>' },
+        { name: 'diamond', fill: '#8E6FCF', svg: '<polygon points="50,5 95,50 50,95 5,50"/>' },
+        { name: 'oval', fill: '#4EAF78', svg: '<ellipse cx="50" cy="50" rx="46" ry="30"/>' },
+        { name: 'pentagon', fill: '#3B82C4', svg: '<polygon points="50,5 93,36 77,86 24,86 7,36"/>' },
+        { name: 'hexagon', fill: '#FF9E80', svg: '<polygon points="50,5 89,28 89,73 50,95 11,73 11,28"/>' },
+        { name: 'trapezoid', fill: '#3AA6A6', svg: '<polygon points="30,20 70,20 90,80 10,80"/>' }
+      ]},
+      { label: 'colors', type: 'color', items: [
+        { name: 'red', color: '#E4443F' },
+        { name: 'blue', color: '#3B82C4' },
+        { name: 'green', color: '#4EAF78' },
+        { name: 'yellow', color: '#FFC93C' },
+        { name: 'purple', color: '#8E6FCF' },
+        { name: 'orange', color: '#FF8A3D' }
+      ]}
+    ];
+
+    const TOTAL_ROUNDS = 5;
+    const PAIRS_PER_ROUND = 4;
+
+    let currentRound = 0;
+    let matchedCount = 0;
+    let dragState = null;
+    let matchedLines = [];
+
+    function makeLineEl(cls) {
+      const d = document.createElement('div');
+      d.className = 'linePath ' + (cls || '');
+      lineLayer.appendChild(d);
+      return d;
+    }
+
+    function setLine(el, x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      el.style.left = x1 + 'px';
+      el.style.top = y1 + 'px';
+      el.style.width = len + 'px';
+      el.style.transform = `rotate(${angle}deg)`;
+    }
+
+    function getCenter(el, boardRect) {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - boardRect.left, y: r.top + r.height / 2 - boardRect.top };
+    }
+
+    function buildBoard() {
+      matchedCount = 0;
+      matchedLines = [];
+      lineLayer.innerHTML = '';
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+      headline.textContent = 'Match them up!';
+      footNote.textContent = 'Drag a line to connect matching pairs';
+      mascot.textContent = '😊';
+      mascot.style.animation = '';
+      updateProgressBar(progressBar, currentRound, TOTAL_ROUNDS);
+
+      const theme = THEME_SETS[randomInt(0, THEME_SETS.length - 1)];
+      const chosen = shuffle(theme.items).slice(0, PAIRS_PER_ROUND);
+      const leftOrder = shuffle(chosen);
+      const rightOrder = shuffleDeranged(chosen, leftOrder, item => item.name);
+
+      function renderContent(item) {
+        if (theme.type === 'color') {
+          return `<span class="colorSwatch" style="background:${item.color}"></span>`;
+        }
+        if (theme.type === 'shape') {
+          return `<span class="matchShapeWrap" style="color:${item.fill}"><svg viewBox="0 0 100 100" class="matchShapeSvg" fill="currentColor">${item.svg}</svg></span>`;
+        }
+        return `<span class="matchEmoji">${item.emoji}</span>`;
+      }
+
+      leftOrder.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'matchItem left';
+        el.dataset.pairId = item.name;
+        el.innerHTML = `${renderContent(item)}<span class="matchDot"></span>`;
+        el.addEventListener('pointerdown', (e) => onDragStart(e, el, item.name));
+        leftCol.appendChild(el);
+      });
+
+      rightOrder.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'matchItem right';
+        el.dataset.pairId = item.name;
+        el.innerHTML = `<span class="matchDot"></span>${renderContent(item)}`;
+        rightCol.appendChild(el);
+      });
+
+      setTimeout(() => speak(`Match the ${theme.label}!`), 300);
+    }
+
+    function onDragStart(e, leftEl, pairId) {
+      if (leftEl.classList.contains('matched')) return;
+      e.preventDefault();
+      const boardRect = matchBoard.getBoundingClientRect();
+      const dotEl = leftEl.querySelector('.matchDot');
+      const start = getCenter(dotEl, boardRect);
+      const tempLine = makeLineEl('temp');
+      setLine(tempLine, start.x, start.y, start.x, start.y);
+      dragState = { pairId, boardRect, start, tempLine, leftEl };
+
+      leftEl.setPointerCapture(e.pointerId);
+      leftEl.addEventListener('pointermove', onDragMove);
+      leftEl.addEventListener('pointerup', onDragEnd, { once: true });
+      leftEl.addEventListener('pointercancel', onDragCancel, { once: true });
+    }
+
+    function onDragMove(e) {
+      if (!dragState) return;
+      const x = e.clientX - dragState.boardRect.left;
+      const y = e.clientY - dragState.boardRect.top;
+      setLine(dragState.tempLine, dragState.start.x, dragState.start.y, x, y);
+    }
+
+    function onDragCancel() {
+      if (!dragState) return;
+      dragState.leftEl.removeEventListener('pointermove', onDragMove);
+      dragState.tempLine.remove();
+      dragState = null;
+    }
+
+    function onDragEnd(e) {
+      if (!dragState) return;
+      const { pairId, tempLine, leftEl, boardRect, start } = dragState;
+      leftEl.removeEventListener('pointermove', onDragMove);
+
+      const dropEl = document.elementFromPoint(e.clientX, e.clientY);
+      const rightItem = dropEl ? dropEl.closest('.matchItem.right') : null;
+
+      if (rightItem && !rightItem.classList.contains('matched')) {
+        if (rightItem.dataset.pairId === pairId) {
+          const freshBoardRect = matchBoard.getBoundingClientRect();
+          const rightDot = rightItem.querySelector('.matchDot');
+          const end = getCenter(rightDot, freshBoardRect);
+          setLine(tempLine, start.x, start.y, end.x, end.y);
+          tempLine.classList.remove('temp');
+          leftEl.classList.add('matched');
+          rightItem.classList.add('matched');
+          matchedLines.push({ leftEl, rightEl: rightItem, lineEl: tempLine });
+          matchedCount++;
+          speak('Yes!');
+          if (matchedCount === PAIRS_PER_ROUND) {
+            setTimeout(onBoardComplete, 600);
+          }
+        } else {
+          tempLine.classList.add('wrongline');
+          speak('Try again!');
+          setTimeout(() => tempLine.remove(), 400);
+        }
+      } else {
+        tempLine.remove();
+      }
+      dragState = null;
+    }
+
+    function onBoardComplete() {
+      mascot.textContent = '🎉';
+      mascot.style.animation = 'mascotHappy 0.7s ease';
+      headline.textContent = 'Great matching!';
+      burstConfetti();
+      currentRound++;
+      setTimeout(() => {
+        if (currentRound >= TOTAL_ROUNDS) finish();
+        else buildBoard();
+      }, 1400);
+    }
+
+    function finish() {
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+      lineLayer.innerHTML = '';
+      updateProgressBar(progressBar, TOTAL_ROUNDS, TOTAL_ROUNDS);
+      mascot.textContent = '🏆';
+      mascot.style.animation = 'mascotHappy 0.9s ease';
+      headline.textContent = kidName ? `You did it, ${kidName}!` : 'You did it!';
+      footNote.textContent = 'Tap the sun to play again';
+      speak(kidName ? `You did it, ${kidName}! All done!` : 'You did it! All done!');
+      burstConfetti();
+    }
+
+    function redrawMatchedLines() {
+      if (!matchedLines.length) return;
+      const boardRect = matchBoard.getBoundingClientRect();
+      matchedLines.forEach(({ leftEl, rightEl, lineEl }) => {
+        const a = getCenter(leftEl.querySelector('.matchDot'), boardRect);
+        const b = getCenter(rightEl.querySelector('.matchDot'), boardRect);
+        setLine(lineEl, a.x, a.y, b.x, b.y);
+      });
+    }
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('matchScreen').classList.contains('hidden')) redrawMatchedLines();
+    });
+
+    mascot.addEventListener('click', () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      currentRound = 0;
+      buildBoard();
+    });
+
+    return {
+      start: function() {
+        currentRound = 0;
+        buildProgressBar(progressBar, TOTAL_ROUNDS);
+        buildBoard();
+      }
+    };
+  })();
+
+  /* ================= CAPITAL & SMALL LETTERS GAME ================= */
+  const LetterGame = (function(){
+    const board = document.getElementById('letterBoard');
+    const lineLayer = document.getElementById('letterLineLayer');
+    const leftCol = document.getElementById('leftColL');
+    const rightCol = document.getElementById('rightColL');
+    const mascot = document.getElementById('mascotLetter');
+    const headline = document.getElementById('headlineLetter');
+    const footNote = document.getElementById('footNoteLetter');
+    const progressBar = document.getElementById('progressBarLetter');
+
+    const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    const PAGE_SIZE = 4;
+    const TOTAL_PAGES = Math.ceil(ALPHABET.length / PAGE_SIZE);
+
+    let currentPage = 0;
+    let matchedCount = 0;
+    let pairsThisPage = 0;
+    let dragState = null;
+    let matchedLines = [];
+
+    function makeLineEl(cls) {
+      const d = document.createElement('div');
+      d.className = 'linePath ' + (cls || '');
+      lineLayer.appendChild(d);
+      return d;
+    }
+
+    function setLine(el, x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      el.style.left = x1 + 'px';
+      el.style.top = y1 + 'px';
+      el.style.width = len + 'px';
+      el.style.transform = `rotate(${angle}deg)`;
+    }
+
+    function getCenter(el, boardRect) {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - boardRect.left, y: r.top + r.height / 2 - boardRect.top };
+    }
+
+    function buildPage() {
+      matchedCount = 0;
+      matchedLines = [];
+      lineLayer.innerHTML = '';
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+      mascot.textContent = '😊';
+      mascot.style.animation = '';
+      updateProgressBar(progressBar, currentPage, TOTAL_PAGES);
+
+      const letters = ALPHABET.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+      pairsThisPage = letters.length;
+      headline.textContent = `Letters ${letters[0].toUpperCase()}\u2013${letters[letters.length - 1].toUpperCase()}`;
+      footNote.textContent = 'Match each capital letter to its small letter';
+
+      const leftOrder = shuffle(letters);
+      const rightOrder = letters.length > 1 ? shuffleDeranged(letters, leftOrder) : shuffle(letters);
+
+      leftOrder.forEach(l => {
+        const el = document.createElement('div');
+        el.className = 'matchItem left';
+        el.dataset.pairId = l;
+        el.innerHTML = `<span class="matchLetter">${l.toUpperCase()}</span><span class="matchDot"></span>`;
+        el.addEventListener('pointerdown', (e) => onDragStart(e, el, l));
+        leftCol.appendChild(el);
+      });
+
+      rightOrder.forEach(l => {
+        const el = document.createElement('div');
+        el.className = 'matchItem right';
+        el.dataset.pairId = l;
+        el.innerHTML = `<span class="matchDot"></span><span class="matchLetter">${l}</span>`;
+        rightCol.appendChild(el);
+      });
+
+      setTimeout(() => speak(`Match the letters ${letters.map(x => x.toUpperCase()).join(', ')}`), 300);
+    }
+
+    function onDragStart(e, leftEl, pairId) {
+      if (leftEl.classList.contains('matched')) return;
+      e.preventDefault();
+      const boardRect = board.getBoundingClientRect();
+      const dotEl = leftEl.querySelector('.matchDot');
+      const start = getCenter(dotEl, boardRect);
+      const tempLine = makeLineEl('temp');
+      setLine(tempLine, start.x, start.y, start.x, start.y);
+      dragState = { pairId, boardRect, start, tempLine, leftEl };
+
+      leftEl.setPointerCapture(e.pointerId);
+      leftEl.addEventListener('pointermove', onDragMove);
+      leftEl.addEventListener('pointerup', onDragEnd, { once: true });
+      leftEl.addEventListener('pointercancel', onDragCancel, { once: true });
+    }
+
+    function onDragMove(e) {
+      if (!dragState) return;
+      const x = e.clientX - dragState.boardRect.left;
+      const y = e.clientY - dragState.boardRect.top;
+      setLine(dragState.tempLine, dragState.start.x, dragState.start.y, x, y);
+    }
+
+    function onDragCancel() {
+      if (!dragState) return;
+      dragState.leftEl.removeEventListener('pointermove', onDragMove);
+      dragState.tempLine.remove();
+      dragState = null;
+    }
+
+    function onDragEnd(e) {
+      if (!dragState) return;
+      const { pairId, tempLine, leftEl, start } = dragState;
+      leftEl.removeEventListener('pointermove', onDragMove);
+
+      const dropEl = document.elementFromPoint(e.clientX, e.clientY);
+      const rightItem = dropEl ? dropEl.closest('.matchItem.right') : null;
+
+      if (rightItem && !rightItem.classList.contains('matched')) {
+        if (rightItem.dataset.pairId === pairId) {
+          const freshBoardRect = board.getBoundingClientRect();
+          const rightDot = rightItem.querySelector('.matchDot');
+          const end = getCenter(rightDot, freshBoardRect);
+          setLine(tempLine, start.x, start.y, end.x, end.y);
+          tempLine.classList.remove('temp');
+          leftEl.classList.add('matched');
+          rightItem.classList.add('matched');
+          matchedLines.push({ leftEl, rightEl: rightItem, lineEl: tempLine });
+          matchedCount++;
+          speak(pairId.toUpperCase());
+          if (matchedCount === pairsThisPage) {
+            setTimeout(onPageComplete, 600);
+          }
+        } else {
+          tempLine.classList.add('wrongline');
+          speak('Try again!');
+          setTimeout(() => tempLine.remove(), 400);
+        }
+      } else {
+        tempLine.remove();
+      }
+      dragState = null;
+    }
+
+    function onPageComplete() {
+      mascot.textContent = '🎉';
+      mascot.style.animation = 'mascotHappy 0.7s ease';
+      headline.textContent = 'Great job!';
+      burstConfetti();
+      currentPage++;
+      setTimeout(() => {
+        if (currentPage >= TOTAL_PAGES) finish();
+        else buildPage();
+      }, 1400);
+    }
+
+    function finish() {
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+      lineLayer.innerHTML = '';
+      updateProgressBar(progressBar, TOTAL_PAGES, TOTAL_PAGES);
+      mascot.textContent = '🏆';
+      mascot.style.animation = 'mascotHappy 0.9s ease';
+      headline.textContent = kidName ? `You did it, ${kidName}!` : 'You did it!';
+      footNote.textContent = 'Tap the sun to play again';
+      speak(kidName ? `You did it, ${kidName}! All done!` : 'You did it! All done!');
+      burstConfetti();
+    }
+
+    function redrawMatchedLines() {
+      if (!matchedLines.length) return;
+      const boardRect = board.getBoundingClientRect();
+      matchedLines.forEach(({ leftEl, rightEl, lineEl }) => {
+        const a = getCenter(leftEl.querySelector('.matchDot'), boardRect);
+        const b = getCenter(rightEl.querySelector('.matchDot'), boardRect);
+        setLine(lineEl, a.x, a.y, b.x, b.y);
+      });
+    }
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('letterScreen').classList.contains('hidden')) redrawMatchedLines();
+    });
+
+    mascot.addEventListener('click', () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      currentPage = 0;
+      buildPage();
+    });
+
+    return {
+      start: function() {
+        currentPage = 0;
+        buildProgressBar(progressBar, TOTAL_PAGES);
+        buildPage();
+      }
+    };
+  })();
+
+})();
+</script>
+
+</body>
+</html>
